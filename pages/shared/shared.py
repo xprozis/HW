@@ -8,13 +8,7 @@ def double_space():
     st.markdown("")
     st.markdown("")
 
-def page_header(title, description):
-    """
-    Gera um cabeçalho identico para todos
-    
-    """
-    st.title(title,help=description)
-    single_space()
+def image_ccs():
     st.image("./pages/shared/Logo_Prozis.png")
     st.markdown(
     """
@@ -27,7 +21,15 @@ def page_header(title, description):
 
     </style>
     """,
-    unsafe_allow_html=True
-)
+    unsafe_allow_html=True)
+
+def page_header(title, description):
+    """
+    Gera um cabeçalho identico para todos
+    
+    """
+    st.title(title,help=description)
+    single_space()
+
 
 
