@@ -28,16 +28,17 @@ st.set_page_config(
 page_header("PCB File Generator","Made by GOATs, for GOATs")
 
 
+
+col1, col2, col3, col4, col5 = st.columns(5)
+with col1:
+    st.button("Anterior", use_container_width=True, on_click=nav_back)
+with col2:
+    st.button("Seguinte", use_container_width=True, on_click=nav_foward)
+with col5:
+    st.button("Download ZIP", use_container_width=True, type="primary", disabled = False)
+
 # Progress bar
 st.progress(pagina/numero_paginas, text=f'Etapas do processo: {pagina} /' + str(numero_paginas))
-
-col1, col2, col3, col4 = st.columns(4)
-with col1:
-    st.button("Retroceder", use_container_width=True, on_click=nav_back)
-with col2:
-    st.button("Avançar", use_container_width=True, on_click=nav_foward)
-with col4:
-    st.button("Download ZIP", use_container_width=True, type="primary", disabled = False)
 
 
 # Nome do projecto
@@ -64,15 +65,20 @@ if pagina == 2:
         st.caption("3) Tirar uma captura de ecra à vista inferior - BOTTOM VIEW")
         st.caption("4) Seleciomar as duas capturas de ecra e colar a baixo")
 
-    pictures_3D_view = st.file_uploader("Adicionar capturas de ecra da vista TOP e BOTTOM da PCB", type="PNG", key="picture_3D", accept_multiple_files=True)
+    st.file_uploader("Adicionar capturas de ecra da vista TOP e BOTTOM da PCB", type="PNG", key="picture_3D", accept_multiple_files=True)
     if ss.picture_3D:
         ss.image_ref = ss.picture_3D  # backup
     
     if ss.image_ref:
-        name_order = st.selectbox("SB_TB_View", ["Top / Bottom View", "Bottom / Top View"], key=[0,1], label_visibility="collapsed")
+        col1,col2 = st.columns([2,1])
+        with col1:
+            name_order = st.selectbox("SB_TB_3D_View", ["Top View / Bottom View", "Bottom View / Top View"], key=[0,1], label_visibility="collapsed")
+        with col2:
+            if st.button("Guardar", use_container_width=True, type="primary"):
+                print("Guardar")
         for i in range(len(ss.image_ref)):   
             st.image(ss.image_ref[i], caption = ss.image_ref[i].name)
-
+        
 ## Vista Silkscreen
 if pagina == 3:
     st.subheader("PDF Silkscreen Top e Bottom view")
@@ -89,6 +95,13 @@ if pagina == 3:
     
     # Now you can access "pdf_ref" anywhere in your app.
     if ss.pdf_ref:
+        col1,col2 = st.columns([2,1])
+        with col1:
+            name_order = st.selectbox("SB_TB_SLK_View", ["Top View / Bottom View", "Bottom View / Top View"], key=[0,1], label_visibility="collapsed")
+        with col2:
+            if st.button("Guardar", use_container_width=True, type="primary"):
+                print("Guardar")
+
         for i in range(len(ss.pdf_ref)): 
             binary_data = ss.pdf_ref[i].getvalue()
             pdf_viewer(input=binary_data, width=700)
@@ -105,11 +118,13 @@ if pagina == 4:
     
     st.file_uploader("Adicionar BOM CSV file", key="bom_csv", type=('csv'))
     if ss.bom_csv:
-        ss.bom_csv_ref =    bom_formatter(pd.read_csv(ss.bom_csv, sep = ";"))
-     
+        ss.bom_csv_ref = bom_formatter(pd.read_csv(ss.bom_csv, sep = ";"))
     
     if not ss.bom_csv_ref.empty:
-        st.caption("Ficheiro XLSL formatado (nota que poderá ser necessário colorir a tabela através do microsoft Excel)")
+        col1,col2, col3 = st.columns([2,0.5,0.5])
+        with col1:
+            st.caption("Ficheiro XLSL formatado (nota que poderá ser necessário colorir a tabela através do microsoft Excel)")
+       
         df_edited = st.data_editor(
             ss.bom_csv_ref,
             use_container_width=True,
@@ -125,9 +140,14 @@ if pagina == 4:
                     required=True,
                 )}, hide_index=True)
         
-        if st.button("Guardar alterações", use_container_width=True):
-            ss.bom_csv_ref = df_edited
-            st.success("Alterações guardadas")
+        
+        with col2:
+            if st.button("Guardar", use_container_width=True, type="primary"):
+                ss.bom_csv_ref = df_edited
+                st.success("Alterações guardadas")
+        with col3:
+            if st.button("Exportar", use_container_width=True, type="primary"):
+                st.success("Ficheiro exportado")
 
 # Pick and Place
 if pagina == 5:
