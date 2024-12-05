@@ -15,6 +15,7 @@ if 'image_ref' not in ss:
 if 'bom_csv_ref' not in ss:
     ss.bom_csv_ref = pd.DataFrame()
 
+
 # Definir variavel de dados
 define_variables()
 
@@ -76,7 +77,10 @@ if pagina == 2:
 if pagina == 3:
     st.subheader("PDF Silkscreen Top e Bottom view")
     with st.expander("Instruções para gerar Silkscreen Top e Bottom"):
-        st.caption("1) No Fusion, abrir a vista 3D da PCB.")
+        st.caption('1) No Fusion, abrir a vista "Layout"')
+        st.caption('2) No separador "Display Layers" selecionar')
+        st.caption('3) Clique em imprimir')
+        st.caption('4) Nas configurações selecionar')
     
     # Access the uploaded ref via a key.
     st.file_uploader("Upload PDF file", type=('pdf'), key='pdf', accept_multiple_files=True)
@@ -100,16 +104,30 @@ if pagina == 4:
         st.caption('4) Pressione "Save" para guardar a BOM.csv')
     
     st.file_uploader("Upload BOM CSV file", key="bom_csv", type=('csv'))
- 
     if ss.bom_csv:
-        ss.bom_csv_ref = pd.read_csv(ss.bom_csv, sep = ";")
-        
+        ss.bom_csv_ref =    bom_formatter(pd.read_csv(ss.bom_csv, sep = ";"))
+     
+    
     if not ss.bom_csv_ref.empty:
         st.caption("Ficheiro XLSL formatado (nota que poderá ser necessário colorir a tabela através do microsoft Excel)")
-        st.dataframe(bom_formatter(ss.bom_csv_ref))
-        st.divider()
-        st.caption("Ficheiro CSV original")
-        st.dataframe(ss.bom_csv_ref)
+        df_edited = st.data_editor(
+            ss.bom_csv_ref,
+            use_container_width=True,
+            column_config={
+                "HANDLING": st.column_config.SelectboxColumn(
+                    "HANDLING",
+                    help="Select the handler",
+                    width="medium",
+                    options=[
+                        "Assembler",
+                        "Prozis"
+                    ],
+                    required=True,
+                )}, hide_index=True)
+        
+        if st.button("Guardar alterações", use_container_width=True):
+            ss.bom_csv_ref = df_edited
+            st.success("Alterações guardadas")
 
 
 if pagina == 5:
