@@ -33,9 +33,9 @@ st.progress(pagina/numero_paginas, text=f'Etapas do processo: {pagina} /' + str(
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    st.button("Passo anterior", use_container_width=True, on_click=nav_back)
+    st.button("Retroceder", use_container_width=True, on_click=nav_back)
 with col2:
-    st.button("Passo seguinte", use_container_width=True, on_click=nav_foward)
+    st.button("Avançar", use_container_width=True, on_click=nav_foward)
 with col4:
     st.button("Download ZIP", use_container_width=True, type="primary", disabled = False)
 
@@ -64,7 +64,7 @@ if pagina == 2:
         st.caption("3) Tirar uma captura de ecra à vista inferior - BOTTOM VIEW")
         st.caption("4) Seleciomar as duas capturas de ecra e colar a baixo")
 
-    pictures_3D_view = st.file_uploader("Capturas de ecra da vista TOP e BOTTOM da PCB", type="PNG", key="picture_3D", accept_multiple_files=True, label_visibility="collapsed")
+    pictures_3D_view = st.file_uploader("Adicionar capturas de ecra da vista TOP e BOTTOM da PCB", type="PNG", key="picture_3D", accept_multiple_files=True)
     if ss.picture_3D:
         ss.image_ref = ss.picture_3D  # backup
     
@@ -73,7 +73,7 @@ if pagina == 2:
         for i in range(len(ss.image_ref)):   
             st.image(ss.image_ref[i], caption = ss.image_ref[i].name)
 
-
+## Vista Silkscreen
 if pagina == 3:
     st.subheader("PDF Silkscreen Top e Bottom view")
     with st.expander("Instruções para gerar Silkscreen Top e Bottom"):
@@ -83,7 +83,7 @@ if pagina == 3:
         st.caption('4) Nas configurações selecionar')
     
     # Access the uploaded ref via a key.
-    st.file_uploader("Upload PDF file", type=('pdf'), key='pdf', accept_multiple_files=True)
+    st.file_uploader("Adicionar PDFs da vista silkscreen Top e Bottom view", type=('pdf'), key='pdf', accept_multiple_files=True)
     if ss.pdf:
         ss.pdf_ref = ss.pdf  # backup
     
@@ -94,7 +94,7 @@ if pagina == 3:
             pdf_viewer(input=binary_data, width=700)
             st.caption(ss.pdf_ref[i].name)
 
-
+# BOM file
 if pagina == 4:
     st.subheader("Bill of Materials (BOM)")
     with st.expander("Instruções para gerar BOM"):
@@ -103,7 +103,7 @@ if pagina == 4:
         st.caption('3) Mudar o "List type" para "Values" e o "Output format" para CSV')
         st.caption('4) Pressione "Save" para guardar a BOM.csv')
     
-    st.file_uploader("Upload BOM CSV file", key="bom_csv", type=('csv'))
+    st.file_uploader("Adicionar BOM CSV file", key="bom_csv", type=('csv'))
     if ss.bom_csv:
         ss.bom_csv_ref =    bom_formatter(pd.read_csv(ss.bom_csv, sep = ";"))
      
@@ -129,9 +129,12 @@ if pagina == 4:
             ss.bom_csv_ref = df_edited
             st.success("Alterações guardadas")
 
-
+# Pick and Place
 if pagina == 5:
     st.subheader("Pick and Place")
+    with st.expander("Instruções para gerar BOM"):
+        st.caption('1) No Fusion, abrir a vista do Esquemático')
+        st.caption('2) No campo "OUTPUT" clicar no primeiro simbolo que representa "Bill of Materials"')
 
 
 

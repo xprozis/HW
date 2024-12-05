@@ -24,10 +24,11 @@ def nav_foward():
     if pagina < numero_paginas:
         pagina+=1
 
-
 def bom_formatter(df):
+    """
+        Formatador de dataframe
+    """
     df_formated = pd.DataFrame()
-
     df_formated["Qty"] = df["Qty"]
     df_formated["REF"] = df["REF"]
     df_formated["DESCRIPTION"] =  df["DESCRIPTION"]
@@ -39,5 +40,7 @@ def bom_formatter(df):
     df_formated["3_MPN"] = df["3_MPN"]
     df_formated["3_MANUFACTURER"] = df["3_MANUFACTURER"]
     df_formated["HANDLING"] = "Assembler"
-    
+
+    df_formated = df_formated[~df_formated['Parts'].str.contains('FID1')]
+    df_formated = df_formated[~df_formated['Parts'].str.contains('FRAME1')]
     return df_formated
