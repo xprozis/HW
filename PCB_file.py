@@ -3,15 +3,17 @@ from pages.shared.shared import *
 from controller.PCB_file_controller import *
 from streamlit_pdf_viewer import pdf_viewer
 from streamlit import session_state as ss
+import pandas as pd
 
 # Declare variable.
 if 'pdf_ref' not in ss:
     ss.pdf_ref = None
 
-# Declare variable.
 if 'image_ref' not in ss:
     ss.image_ref = None
 
+if 'bom_csv_ref' not in ss:
+    ss.bom_csv_ref = pd.DataFrame()
 
 # Definir variavel de dados
 define_variables()
@@ -26,7 +28,7 @@ page_header("PCB File Generator","Made by GOATs, for GOATs")
 
 
 # Progress bar
-st.progress(pagina/numero_paginas, text=f'{pagina} /' + str(numero_paginas))
+st.progress(pagina/numero_paginas, text=f'Etapas do processo: {pagina} /' + str(numero_paginas))
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
@@ -88,6 +90,7 @@ if pagina == 3:
             pdf_viewer(input=binary_data, width=700)
             st.caption(ss.pdf_ref[i].name)
 
+
 if pagina == 4:
     st.subheader("Bill of Materials (BOM)")
     with st.expander("Instruções para gerar BOM"):
@@ -95,7 +98,19 @@ if pagina == 4:
         st.caption('2) No campo "OUTPUT" clicar no primeiro simbolo que representa "Bill of Materials"')
         st.caption('3) Mudar o "List type" para "Values" e o "Output format" para CSV')
         st.caption('4) Pressione "Save" para guardar a BOM.csv')
-    csv = st.file_uploader("Upload BOM CSV file", type=('csv'))
+    
+    st.file_uploader("Upload BOM CSV file", key="bom_csv", type=('csv'))
+ 
+    if ss.bom_csv:
+        ss.bom_csv_ref = pd.read_csv(ss.bom_csv, sep = ";")
+        
+    if not ss.bom_csv_ref.empty:
+        st.caption("Ficheiro XLSL formatado (nota que poderá ser necessário colorir a tabela através do microsoft Excel)")
+        st.dataframe(bom_formatter(ss.bom_csv_ref))
+        st.divider()
+        st.caption("Ficheiro CSV original")
+        st.dataframe(ss.bom_csv_ref)
+
 
 if pagina == 5:
     st.subheader("Pick and Place")
