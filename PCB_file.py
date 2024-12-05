@@ -1,8 +1,20 @@
 import streamlit as st
 from pages.shared.shared import *
 from controller.PCB_file_controller import *
+from streamlit_pdf_viewer import pdf_viewer
+from streamlit import session_state as ss
+
+# Declare variable.
+if 'pdf_ref' not in ss:
+    ss.pdf_ref = None
+
+# Declare variable.
+if 'image_ref' not in ss:
+    ss.image_ref = None
 
 
+# Definir variavel de dados
+define_variables()
 
 st.set_page_config(
     page_title="PROZIS HW File",
@@ -18,18 +30,16 @@ st.progress(pagina/numero_paginas, text=f'{pagina} /' + str(numero_paginas))
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    st.button("ANTERIOR", use_container_width=True, on_click=nav_back)
+    st.button("Passo anterior", use_container_width=True, on_click=nav_back)
 with col2:
-    st.button("SEGUINTE", use_container_width=True, on_click=nav_foward)
+    st.button("Passo seguinte", use_container_width=True, on_click=nav_foward)
 with col4:
-    st.button("GERAR ZIP", use_container_width=True, type="primary")
+    st.button("Download ZIP", use_container_width=True, type="primary", disabled = False)
 
-# Definir variavel de dados
-define_dic()
 
 # Nome do projecto
 if pagina == 1:
-    st.subheader("1.º Nome do projecto")
+    st.subheader("Nome do projecto")
     st.caption("Inserir o Nome e Versão do projecto a ser apresentado na pasta de ficheiros")
     col1, col2 = st.columns([3,1])
     with col1:
@@ -42,33 +52,53 @@ if pagina == 1:
         project_dic["nome_projecto"] = nome_projecto
         project_dic["versao_projecto"] = versao_projecto
 
+# Inserir imagens
 if pagina == 2:
-    st.subheader("2.º Ficheiros 3D")
+    st.subheader("Imagens 3D Top e Bottom view")
+    with st.expander("Instruções de como captar as fotos"):
+        st.caption("1) No Fusion, abrir a vista 3D da PCB.")
+        st.caption("2) Começar por tirar uma captura de ecra à vista superior - TOP VIEW")
+        st.caption("3) Tirar uma captura de ecra à vista inferior - BOTTOM VIEW")
+        st.caption("4) Seleciomar as duas capturas de ecra e colar a baixo")
+
+    pictures_3D_view = st.file_uploader("Capturas de ecra da vista TOP e BOTTOM da PCB", type="PNG", key="picture_3D", accept_multiple_files=True, label_visibility="collapsed")
+    if ss.picture_3D:
+        ss.image_ref = ss.picture_3D  # backup
     
+    if ss.image_ref:
+        name_order = st.selectbox("SB_TB_View", ["Top / Bottom View", "Bottom / Top View"], key=[0,1], label_visibility="collapsed")
+        for i in range(len(ss.image_ref)):   
+            st.image(ss.image_ref[i], caption = ss.image_ref[i].name)
 
-    name_0 = ["TOP_VIEW","BOTTOM_VIEW"]
-    name_1 = ["BOTTOM_VIEW","TOP_VIEW"]
-
-    st.caption("1) No Fusion, abrir a vista 3D da PCB.")
-    st.caption("2) Começar por tirar uma captura de ecra à vista superior - TOP VIEW")
-    st.caption("3) Tirar uma captura de ecra à vista inferior - BOTTOM VIEW")
-    st.caption("4) Seleciomar as duas capturas de ecra")
-
-    picture = st.file_uploader("Capturas de ecra da vista TOP e BOTTOM da PCB", type="PNG", accept_multiple_files=True, label_visibility="collapsed")
-    if picture:
-        for i in range(len(picture)):
-                st.image(picture[i], caption = name_0[i])
 
 if pagina == 3:
-    st.subheader("3.º Ficheiros Assembly")
-    top_bottom_view_silkscreen = st.file_uploader("2 PDF files of Silkscreen TOP and BOTTOM", type="pdf")
-    BOM_file = st.file_uploader("BOM File", type="xlsl")
-    pick_and_place = st.file_uploader("Pick and Place File", type="xlsl")
+    st.subheader("PDF Silkscreen Top e Bottom view")
+    with st.expander("Instruções para gerar Silkscreen Top e Bottom"):
+        st.caption("1) No Fusion, abrir a vista 3D da PCB.")
+    
+    # Access the uploaded ref via a key.
+    st.file_uploader("Upload PDF file", type=('pdf'), key='pdf', accept_multiple_files=True)
+    if ss.pdf:
+        ss.pdf_ref = ss.pdf  # backup
+    
+    # Now you can access "pdf_ref" anywhere in your app.
+    if ss.pdf_ref:
+        for i in range(len(ss.pdf_ref)): 
+            binary_data = ss.pdf_ref[i].getvalue()
+            pdf_viewer(input=binary_data, width=700)
+            st.caption(ss.pdf_ref[i].name)
 
 if pagina == 4:
-    st.subheader("3.º Gerber Files")
+    st.subheader("Bill of Materials (BOM)")
+    with st.expander("Instruções para gerar BOM"):
+        st.caption('1) No Fusion, abrir a vista do Esquemático')
+        st.caption('2) No campo "OUTPUT" clicar no primeiro simbolo que representa "Bill of Materials"')
+        st.caption('3) Mudar o "List type" para "Values" e o "Output format" para CSV')
+        st.caption('4) Pressione "Save" para guardar a BOM.csv')
+    csv = st.file_uploader("Upload BOM CSV file", type=('csv'))
 
 if pagina == 5:
-    st.subheader("4.º ReadME Files")
+    st.subheader("Pick and Place")
+
 
 
