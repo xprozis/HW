@@ -54,43 +54,28 @@ st.file_uploader("Adicionar todos os ficheiros gerados", type=['png','pdf','csv'
 if ss.all_files:
     ss.all_files_ref = ss.all_files
 
+custom_single_space()
 
-with st.expander("⚙️ Expandir para obter mais informações à cerca dos ficheiros necessários"):
-    col1,col2,col3 = st.columns(3)
-    with col1:
+
+col1, col2 = st.columns(2, gap="medium")
+with col1:
+    st.subheader("Top_View, Bottom_View e Layer_stack")
+    with st.expander("⚙️ Expandir para obter mais informações à cerca dos ficheiros necessários"):
         st.markdown("Adicionar capturas de ecra da vista TOP e BOTTOM da PCB")
         st.caption("1) No Fusion, abrir a vista 3D da PCB.")
         st.caption("2) Começar por tirar uma captura de ecra à vista superior - TOP VIEW")
         st.caption("3) Tirar uma captura de ecra à vista inferior - BOTTOM VIEW")
         st.caption("4) Seleciomar as duas capturas de ecra e colar a baixo")
-    with col2:
-        st.markdown("Instruções para gerar Silkscreen Top e Bottom")
-        st.caption('1) No Fusion, abrir a vista "Layout"')
-        st.caption('2) No separador "Display Layers" selecionar')
-        st.caption('3) Clique em imprimir')
-        st.caption('4) Nas configurações selecionar')
-    with col3:
-        st.markdown("Instruções para gerar BOM")
-        st.caption('1) No Fusion, abrir a vista do Esquemático')
-        st.caption('2) No campo "OUTPUT" clicar no primeiro simbolo que representa "Bill of Materials"')
-        st.caption('3) Mudar o "List type" para "Values" e o "Output format" para CSV')
-        st.caption('4) Pressione "Save" para guardar a BOM.csv')
-
-st.divider()
-
-
-col1, col2 , col3 = st.columns(3)
-with col1:
-    st.subheader("Top_View, Bottom_View e Layer_stack")    
+    
     if ss.all_files_ref:
         pic_counter = 0
         for i in range(len(ss.all_files_ref)):
             if ss.all_files_ref[i].type == "image/png":
                 pic_counter+=1
-                st.image(ss.all_files_ref[i], caption = ss.all_files_ref[i].name, width=500)
-                col11, col22 = st.columns(2)
+                st.image(ss.all_files_ref[i], caption = ss.all_files_ref[i].name)
+                col11, center, col22 = st.columns(3)
                 with col11:
-                    st.selectbox("SB_Pictures_" + str(pic_counter), ["Top View", "Bottom View", "Layer Stack"], label_visibility="collapsed")
+                   st.selectbox("SB_Pictures_" + str(pic_counter), ["Top View", "Bottom View", "Layer Stack"], label_visibility="collapsed")
                 with col22:
                     download_button_image(ss.all_files_ref[i], "Guardar Imagem " + str(pic_counter), ss.all_files_ref[i].name)
                 st.divider()
@@ -99,25 +84,40 @@ with col1:
 
 with col2:
     st.subheader("Top_View_Silkscreen, Bottom_View_Silkcseen")
+    with st.expander("⚙️ Expandir para obter mais informações à cerca dos ficheiros necessários"):
+        st.markdown("Instruções para gerar Silkscreen Top e Bottom")
+        st.caption('1) No Fusion, abrir a vista "Layout"')
+        st.caption('2) No separador "Display Layers" selecionar')
+        st.caption('3) Clique em imprimir')
+        st.caption('4) Nas configurações selecionar')
+    
     if ss.all_files_ref:
         pdf_counter = 0
         for i in range(len(ss.all_files_ref)):
             if ss.all_files_ref[i].type == "application/pdf":
                 pdf_counter+=1
                 binary_data = ss.all_files_ref[i].getvalue()
-                pdf_viewer(input=binary_data, width=500)
-                st.caption(ss.all_files_ref[i].name)
-                col11, col22 = st.columns(2,)
+                pdf_viewer(input=binary_data)
+                st.caption(ss.all_files_ref[i].name)  
+                col11, center, col22 = st.columns(3)
                 with col11:
-                    st.selectbox("SB_PDF_" + str(pdf_counter), ["Top Silkscreen", "Bottom Silkscreen"], label_visibility="collapsed")
-                with col22:
+                    st.selectbox("SB_PDF_" + str(pdf_counter), ["Top Silkscreen", "Bottom Silkscreen"], label_visibility="collapsed")  
+                with col22: 
                     download_button_pdf(ss.all_files_ref[i], "Guardar PDF " + str(pdf_counter), ss.all_files_ref[i].name)
                 st.divider()
     else:
         st.caption("Sem ficheiros para mostrar")
-
-with col3:
+ 
+col1, col2 = st.columns(2, gap="medium")
+with col1:
     st.subheader("BOM e Pick_and_Place")
+    with st.expander("⚙️ Expandir para obter mais informações à cerca dos ficheiros necessários"):  
+        st.markdown("Instruções para gerar BOM")
+        st.caption('1) No Fusion, abrir a vista do Esquemático')
+        st.caption('2) No campo "OUTPUT" clicar no primeiro simbolo que representa "Bill of Materials"')
+        st.caption('3) Mudar o "List type" para "Values" e o "Output format" para CSV')
+        st.caption('4) Pressione "Save" para guardar a BOM.csv')
+    
     if ss.all_files_ref:
         for i in range(len(ss.all_files_ref)):
             if ss.all_files_ref[i].type == "text/csv":
@@ -137,6 +137,15 @@ with col3:
                             ],
                             required=True,
                         )}, hide_index=True)
-                st.divider()
+               
     else:
         st.caption("Sem ficheiros para mostrar")
+
+with col2:
+    st.subheader("Ficheiro Read Me")
+    if ss.all_files_ref:
+        st.text_area("")
+    else:
+        st.divider()
+        st.caption("Sem ficheiros para mostrar")
+      

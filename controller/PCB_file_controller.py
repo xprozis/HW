@@ -5,6 +5,10 @@ import io
 import cv2
 import numpy as np
 
+
+def custom_single_space():
+    st.markdwon("")
+    
 def bom_formatter(df):
     """
         Formatador de dataframe
@@ -31,9 +35,9 @@ def load_image(image_file):
     img = Image.open(image_file)
     return img
 
-def download_button_image(picture_file,label_btn,file_name):
+def download_button_image(file,label_btn,file_name):
     buffer = io.BytesIO()
-    file = picture_file.read()
+    file = file.read()
     file_bytes = np.asarray(bytearray(file), dtype=np.uint8)
     imageBGR = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
     imageRGB = cv2.cvtColor(imageBGR , cv2.COLOR_BGR2RGB)
@@ -44,5 +48,5 @@ def download_button_image(picture_file,label_btn,file_name):
     st.download_button(label=label_btn,data=buffer, file_name=file_name,mime="image/png", type="primary", use_container_width=True)
 
 
-def download_button_pdf(picture_file,label_btn,file_name):
-    st.caption("D")
+def download_button_pdf(file,label_btn,file_name):
+    st.download_button(label=label_btn,data=file, file_name=file_name,mime="image/png", type="primary", use_container_width=True)
