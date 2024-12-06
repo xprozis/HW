@@ -3,7 +3,7 @@ from pages.shared.shared import *
 from controller.PCB_file_controller import *
 from streamlit_pdf_viewer import pdf_viewer
 from streamlit import session_state as ss
-import pandas as pd
+
 
 numero_paginas = 6
 

@@ -3,4 +3,3 @@ pandas
 openpyxl
 xlsxwriter
 streamlit_pdf_viewer
-opencv-python

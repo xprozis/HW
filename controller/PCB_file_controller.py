@@ -69,5 +69,5 @@ def download_button_pdf(file,label_btn,file_name):
 
 
 def download_button_xsls(file,label_btn,file_name):
-    file = file.read()
     st.download_button(label=label_btn,data=file, file_name=file_name,mime="text/xlsx", type="primary", use_container_width=True)
+
