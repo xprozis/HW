@@ -1,16 +1,27 @@
-import streamlit as st
+
 from pages.shared.shared import *
 from controller.PCB_file_controller import *
 from streamlit_pdf_viewer import pdf_viewer
 from streamlit import session_state as ss
 import pandas as pd
+import io
+import cv2
+import numpy as np
 
-# Declare variable.
-if 'pdf_ref' not in ss:
-    ss.pdf_ref = None
+if 'nome_projecto_ref' not in ss:
+    ss.nome_projecto_ref = "pcb0000A_v0.0"
 
 if 'image_ref' not in ss:
     ss.image_ref = None
+
+if 'image_3D_order_ref' not in ss:
+    ss.image_3D_order_ref = 0
+
+if 'pdf_order_ref' not in ss:
+    ss.pdf_order_ref = 0
+
+if 'pdf_ref' not in ss:
+    ss.pdf_ref = None
 
 if 'bom_csv_ref' not in ss:
     ss.bom_csv_ref = pd.DataFrame()
@@ -18,6 +29,8 @@ if 'bom_csv_ref' not in ss:
 
 # Definir variavel de dados
 define_variables()
+
+
 
 st.set_page_config(
     page_title="PROZIS HW File",
@@ -28,14 +41,15 @@ st.set_page_config(
 page_header("PCB File Generator","Made by GOATs, for GOATs")
 
 
-
 col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     st.button("Anterior", use_container_width=True, on_click=nav_back)
 with col2:
     st.button("Seguinte", use_container_width=True, on_click=nav_foward)
 with col5:
-    st.button("Download ZIP", use_container_width=True, type="primary", disabled = False)
+    if st.button("Download ZIP", use_container_width=True, type="primary", disabled = False):
+        for i in range(7):
+            print("Teste" + str(i))
 
 # Progress bar
 st.progress(pagina/numero_paginas, text=f'Etapas do processo: {pagina} /' + str(numero_paginas))
@@ -44,17 +58,14 @@ st.progress(pagina/numero_paginas, text=f'Etapas do processo: {pagina} /' + str(
 # Nome do projecto
 if pagina == 1:
     st.subheader("Nome do projecto")
-    st.caption("Inserir o Nome e Versão do projecto a ser apresentado na pasta de ficheiros")
-    col1, col2 = st.columns([3,1])
-    with col1:
-        nome_projecto = st.text_input("NomeProjecto", value = project_dic["nome_projecto"], placeholder="Nome da PCB ex: pcb002A", label_visibility="collapsed")
-    with col2:
-        versao_projecto = st.text_input("Versao", value = project_dic["versao_projecto"], placeholder="Versão da PCB: ex: 2.0", label_visibility="collapsed")
-    if nome_projecto and versao_projecto:
-        st.subheader("Projecto: " + nome_projecto + "_V" + versao_projecto)
-        st.caption("Directoria final: ./" + nome_projecto + "/" + versao_projecto + "/" + nome_projecto + "_" + versao_projecto + "/Production/")
-        project_dic["nome_projecto"] = nome_projecto
-        project_dic["versao_projecto"] = versao_projecto
+    st.caption('Inserir o Nome e Versão da PCB a produzir, separados por "_". Exemplo: "pcb0021B_V0.75')
+    
+    st.text_input("NomeProjecto", value = ss.nome_projecto_ref, key = "nome_projecto", placeholder='Nome projecto: "pcb0000_V0.0"', label_visibility="collapsed")
+    if ss.nome_projecto:
+        ss.nome_projecto_ref = ss.nome_projecto
+
+
+        
 
 # Inserir imagens
 if pagina == 2:
@@ -70,15 +81,46 @@ if pagina == 2:
         ss.image_ref = ss.picture_3D  # backup
     
     if ss.image_ref:
-        col1,col2 = st.columns([2,1])
-        with col1:
-            name_order = st.selectbox("SB_TB_3D_View", ["Top View / Bottom View", "Bottom View / Top View"], key=[0,1], label_visibility="collapsed")
-        with col2:
-            if st.button("Guardar", use_container_width=True, type="primary"):
-                print("Guardar")
+        st.selectbox("SB_TB_3D_View", ["Top View / Bottom View", "Bottom View / Top View"], index= ss.image_3D_order_ref, key="image_3D_order", label_visibility="collapsed")
+        if ss.image_3D_order:
+            if ss.image_3D_order == "Top View / Bottom View":
+                ss.image_3D_order_ref = 0
+            else:
+                ss.image_3D_order_ref = 1
+
         for i in range(len(ss.image_ref)):   
             st.image(ss.image_ref[i], caption = ss.image_ref[i].name)
         
+        picture_file = ss.image_ref[0]
+    
+        # Teste
+        img = load_image(picture_file)
+        st.image(img)
+        with open(os.path.join("controller",picture_file.name),"wb") as f:
+            f.write(picture_file.getbuffer())
+
+
+
+        # Teste
+        if False:
+            buffer = io.BytesIO()
+            file = picture_file.read()
+            file_bytes = np.asarray(bytearray(file), dtype=np.uint8)
+            imageBGR = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+            imageRGB = cv2.cvtColor(imageBGR , cv2.COLOR_BGR2RGB)
+            im = Image.fromarray(imageRGB)
+            im_2 = Image.fromarray(imageBGR)
+            im.save(buffer, format="PNG")
+            im_2.save(buffer, format="PNG")
+            
+            st.download_button(
+                label=f"Download",
+                data=buffer, 
+                file_name=f"Top_View.png",
+                mime="image/png")
+                
+
+
 ## Vista Silkscreen
 if pagina == 3:
     st.subheader("PDF Silkscreen Top e Bottom view")
@@ -95,12 +137,12 @@ if pagina == 3:
     
     # Now you can access "pdf_ref" anywhere in your app.
     if ss.pdf_ref:
-        col1,col2 = st.columns([2,1])
-        with col1:
-            name_order = st.selectbox("SB_TB_SLK_View", ["Top View / Bottom View", "Bottom View / Top View"], key=[0,1], label_visibility="collapsed")
-        with col2:
-            if st.button("Guardar", use_container_width=True, type="primary"):
-                print("Guardar")
+        st.selectbox("SB_TB_SLK_View", ["Top View / Bottom View", "Bottom View / Top View"], index= ss.pdf_order_ref, key="pdf_order", label_visibility="collapsed")
+        if ss.pdf_order:
+            if ss.pdf_order == "Top View / Bottom View":
+                ss.pdf_order_ref = 0
+            else:
+                ss.pdf_order_ref = 1
 
         for i in range(len(ss.pdf_ref)): 
             binary_data = ss.pdf_ref[i].getvalue()
@@ -139,15 +181,12 @@ if pagina == 4:
                     ],
                     required=True,
                 )}, hide_index=True)
-        
-        
         with col2:
             if st.button("Guardar", use_container_width=True, type="primary"):
                 ss.bom_csv_ref = df_edited
-                st.success("Alterações guardadas")
         with col3:
             if st.button("Exportar", use_container_width=True, type="primary"):
-                st.success("Ficheiro exportado")
+                ""
 
 # Pick and Place
 if pagina == 5:
@@ -155,6 +194,4 @@ if pagina == 5:
     with st.expander("Instruções para gerar BOM"):
         st.caption('1) No Fusion, abrir a vista do Esquemático')
         st.caption('2) No campo "OUTPUT" clicar no primeiro simbolo que representa "Bill of Materials"')
-
-
 

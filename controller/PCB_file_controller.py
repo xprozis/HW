@@ -1,4 +1,7 @@
 import pandas as pd
+from PIL import Image
+import streamlit as st
+import os
 
 pagina = 1
 numero_paginas = 6
@@ -44,3 +47,8 @@ def bom_formatter(df):
     df_formated = df_formated[~df_formated['Parts'].str.contains('FID1')]
     df_formated = df_formated[~df_formated['Parts'].str.contains('FRAME1')]
     return df_formated
+
+
+def load_image(image_file):
+    img = Image.open(image_file)
+    return img
