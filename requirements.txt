@@ -4,4 +4,3 @@ openpyxl
 xlsxwriter
 streamlit_pdf_viewer
 cv2
-libgl1
