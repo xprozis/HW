@@ -7,7 +7,7 @@ import numpy as np
 
 
 def custom_single_space():
-    st.markdwon("")
+    st.markdown("")
     
 def bom_formatter(df):
     """

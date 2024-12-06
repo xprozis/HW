@@ -73,7 +73,7 @@ with col1:
             if ss.all_files_ref[i].type == "image/png":
                 pic_counter+=1
                 st.image(ss.all_files_ref[i], caption = ss.all_files_ref[i].name)
-                col11, center, col22 = st.columns(3)
+                col11, col22 = st.columns(2)
                 with col11:
                    st.selectbox("SB_Pictures_" + str(pic_counter), ["Top View", "Bottom View", "Layer Stack"], label_visibility="collapsed")
                 with col22:
@@ -99,7 +99,7 @@ with col2:
                 binary_data = ss.all_files_ref[i].getvalue()
                 pdf_viewer(input=binary_data)
                 st.caption(ss.all_files_ref[i].name)  
-                col11, center, col22 = st.columns(3)
+                col11, col22 = st.columns(2)
                 with col11:
                     st.selectbox("SB_PDF_" + str(pdf_counter), ["Top Silkscreen", "Bottom Silkscreen"], label_visibility="collapsed")  
                 with col22: 
