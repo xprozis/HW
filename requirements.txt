@@ -1,7 +1,7 @@
 streamlit
 pandas
 openpyxl
+xlsxwriter
 streamlit_pdf_viewer
-opencv-python
+cv2
 libgl1
-libglib2.0-0
