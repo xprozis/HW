@@ -1,9 +1,19 @@
 import pandas as pd
 from PIL import Image
 import streamlit as st
-import io
-import cv2
-import numpy as np
+
+
+
+project_dic = {
+  "nome_projecto": "pcb0000",
+  "versao_projecto": "0.0",
+}
+
+silk_top = 0
+silk_bottom = 0
+
+def define_variables():
+    global project_dic
 
 def bom_formatter(df):
     """
@@ -30,19 +40,3 @@ def bom_formatter(df):
 def load_image(image_file):
     img = Image.open(image_file)
     return img
-
-def download_button_image(picture_file,label_btn,file_name):
-    buffer = io.BytesIO()
-    file = picture_file.read()
-    file_bytes = np.asarray(bytearray(file), dtype=np.uint8)
-    imageBGR = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-    imageRGB = cv2.cvtColor(imageBGR , cv2.COLOR_BGR2RGB)
-    im = Image.fromarray(imageRGB)
-    im_2 = Image.fromarray(imageBGR)
-    im.save(buffer, format="PNG")
-    im_2.save(buffer, format="PNG")
-    st.download_button(label=label_btn,data=buffer, file_name=file_name,mime="image/png", type="primary", use_container_width=True)
-
-
-def download_button_pdf(picture_file,label_btn,file_name):
-    st.caption("D")
