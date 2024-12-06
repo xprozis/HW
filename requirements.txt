@@ -3,3 +3,5 @@ pandas
 openpyxl
 streamlit_pdf_viewer
 opencv-python
+libgl1
+libglib2.0-0
