@@ -8,6 +8,12 @@ import io
 import cv2
 import numpy as np
 
+
+numero_paginas = 6
+
+if 'pagina_ref' not in ss:
+    ss.pagina_ref = 1
+
 if 'nome_projecto_ref' not in ss:
     ss.nome_projecto_ref = "pcb0000A_v0.0"
 
@@ -30,8 +36,6 @@ if 'bom_csv_ref' not in ss:
 # Definir variavel de dados
 define_variables()
 
-
-
 st.set_page_config(
     page_title="PROZIS HW File",
     page_icon="🔴",
@@ -43,20 +47,26 @@ page_header("PCB File Generator","Made by GOATs, for GOATs")
 
 col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
-    st.button("Anterior", use_container_width=True, on_click=nav_back)
+    st.button("Anterior", key="pagina_anterior", use_container_width=True)
+    if ss.pagina_anterior:
+        if ss.pagina_ref > 1:
+            ss.pagina_ref = ss.pagina_ref - 1
 with col2:
-    st.button("Seguinte", use_container_width=True, on_click=nav_foward)
+    st.button("Seguinte", key="pagina_seguinte", use_container_width=True)
+    if ss.pagina_seguinte:
+        if ss.pagina_ref < numero_paginas:
+            ss.pagina_ref = ss.pagina_ref + 1
 with col5:
     if st.button("Download ZIP", use_container_width=True, type="primary", disabled = False):
         for i in range(7):
             print("Teste" + str(i))
 
 # Progress bar
-st.progress(pagina/numero_paginas, text=f'Etapas do processo: {pagina} /' + str(numero_paginas))
+st.progress(ss.pagina_ref/numero_paginas, text=f'Etapas do processo: {ss.pagina_ref} /' + str(numero_paginas))
 
 
 # Nome do projecto
-if pagina == 1:
+if ss.pagina_ref == 1:
     st.subheader("Nome do projecto")
     st.caption('Inserir o Nome e Versão da PCB a produzir, separados por "_". Exemplo: "pcb0021B_V0.75')
     
@@ -65,10 +75,8 @@ if pagina == 1:
         ss.nome_projecto_ref = ss.nome_projecto
 
 
-        
-
 # Inserir imagens
-if pagina == 2:
+if ss.pagina_ref == 2:
     st.subheader("Imagens 3D Top e Bottom view")
     with st.expander("Instruções de como captar as fotos"):
         st.caption("1) No Fusion, abrir a vista 3D da PCB.")
@@ -92,37 +100,24 @@ if pagina == 2:
             st.image(ss.image_ref[i], caption = ss.image_ref[i].name)
         
         picture_file = ss.image_ref[0]
-    
-        # Teste
-        img = load_image(picture_file)
-        st.image(img)
-        with open(os.path.join("controller",picture_file.name),"wb") as f:
-            f.write(picture_file.getbuffer())
-
-
-
-        # Teste
-        if False:
-            buffer = io.BytesIO()
-            file = picture_file.read()
-            file_bytes = np.asarray(bytearray(file), dtype=np.uint8)
-            imageBGR = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-            imageRGB = cv2.cvtColor(imageBGR , cv2.COLOR_BGR2RGB)
-            im = Image.fromarray(imageRGB)
-            im_2 = Image.fromarray(imageBGR)
-            im.save(buffer, format="PNG")
-            im_2.save(buffer, format="PNG")
-            
-            st.download_button(
-                label=f"Download",
-                data=buffer, 
-                file_name=f"Top_View.png",
-                mime="image/png")
-                
-
-
+        buffer = io.BytesIO()
+        file = picture_file.read()
+        file_bytes = np.asarray(bytearray(file), dtype=np.uint8)
+        imageBGR = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+        imageRGB = cv2.cvtColor(imageBGR , cv2.COLOR_BGR2RGB)
+        im = Image.fromarray(imageRGB)
+        im_2 = Image.fromarray(imageBGR)
+        im.save(buffer, format="PNG")
+        im_2.save(buffer, format="PNG")
+        
+        st.download_button(
+            label=f"Download",
+            data=buffer, 
+            file_name=f"Top_View.png",
+            mime="image/png")
+        
 ## Vista Silkscreen
-if pagina == 3:
+if ss.pagina_ref == 3:
     st.subheader("PDF Silkscreen Top e Bottom view")
     with st.expander("Instruções para gerar Silkscreen Top e Bottom"):
         st.caption('1) No Fusion, abrir a vista "Layout"')
@@ -150,7 +145,7 @@ if pagina == 3:
             st.caption(ss.pdf_ref[i].name)
 
 # BOM file
-if pagina == 4:
+if ss.pagina_ref == 4:
     st.subheader("Bill of Materials (BOM)")
     with st.expander("Instruções para gerar BOM"):
         st.caption('1) No Fusion, abrir a vista do Esquemático')
@@ -189,7 +184,7 @@ if pagina == 4:
                 ""
 
 # Pick and Place
-if pagina == 5:
+if ss.pagina_ref == 5:
     st.subheader("Pick and Place")
     with st.expander("Instruções para gerar BOM"):
         st.caption('1) No Fusion, abrir a vista do Esquemático')
