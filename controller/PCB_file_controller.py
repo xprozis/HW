@@ -8,7 +8,13 @@ import numpy as np
 
 def custom_single_space():
     st.markdown("")
-    
+
+def pickplace_formatter(df):
+    df = df[~df['RefDes,Layer,LocationX,LocationY,Rotation'].str.contains('FID')]
+    df = df[~df['RefDes,Layer,LocationX,LocationY,Rotation'].str.contains('FRAME')]
+    return df
+
+
 def bom_formatter(df):
     """
         Formatador de dataframe
@@ -30,6 +36,17 @@ def bom_formatter(df):
     df_formated = df_formated[~df_formated['Parts'].str.contains('FRAME1')]
     return df_formated
 
+def df_checker(df):
+    """
+        Verifica o numero de colunas, se for 1 é o Pick and Place se for mais é a BOM
+    """
+    if len(df.columns) == 1:
+        
+        return "PicK_and_Place", pickplace_formatter(df)
+
+    else:
+        return "BOM", bom_formatter(df)
+    
 
 def load_image(image_file):
     img = Image.open(image_file)
@@ -42,11 +59,15 @@ def download_button_image(file,label_btn,file_name):
     imageBGR = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
     imageRGB = cv2.cvtColor(imageBGR , cv2.COLOR_BGR2RGB)
     im = Image.fromarray(imageRGB)
-    im_2 = Image.fromarray(imageBGR)
     im.save(buffer, format="PNG")
-    im_2.save(buffer, format="PNG")
     st.download_button(label=label_btn,data=buffer, file_name=file_name,mime="image/png", type="primary", use_container_width=True)
 
 
 def download_button_pdf(file,label_btn,file_name):
-    st.download_button(label=label_btn,data=file, file_name=file_name,mime="image/png", type="primary", use_container_width=True)
+    file = file.read()
+    st.download_button(label=label_btn,data=file, file_name=file_name,mime="application/pdf", type="primary", use_container_width=True)
+
+
+def download_button_xsls(file,label_btn,file_name):
+    file = file.read()
+    st.download_button(label=label_btn,data=file, file_name=file_name,mime="text/xlsx", type="primary", use_container_width=True)

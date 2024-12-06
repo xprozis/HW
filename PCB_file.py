@@ -5,16 +5,13 @@ from streamlit_pdf_viewer import pdf_viewer
 from streamlit import session_state as ss
 import pandas as pd
 
-
-
-
 numero_paginas = 6
 
 if 'pagina_ref' not in ss:
     ss.pagina_ref = 1
 
 if 'nome_projecto_ref' not in ss:
-    ss.nome_projecto_ref = None
+    ss.nome_projecto_ref = "pcb000A_V0.0"
 
 if 'all_files_ref' not in ss:
     ss.all_files_ref = None
@@ -48,14 +45,13 @@ with col1:
     st.text_input("NomeProjecto", value = ss.nome_projecto_ref, key = "nome_projecto", placeholder='Nome projecto: "pcb0000_V0.0"', label_visibility="collapsed")
     if ss.nome_projecto:
         ss.nome_projecto_ref = ss.nome_projecto
-    st.caption('(Inserir o Nome e Versão da PCB a produzir, separados por "_". Exemplo: "pcb0021B_V0.75') 
+    st.caption('(Inserir o Nome e Versão da PCB a produzir, separados por "_". Exemplo: "pcb0021B_V0.75')
 
 st.file_uploader("Adicionar todos os ficheiros gerados", type=['png','pdf','csv'], key="all_files", accept_multiple_files=True, label_visibility="collapsed")
 if ss.all_files:
     ss.all_files_ref = ss.all_files
 
 custom_single_space()
-
 
 col1, col2 = st.columns(2, gap="medium")
 with col1:
@@ -72,12 +68,13 @@ with col1:
         for i in range(len(ss.all_files_ref)):
             if ss.all_files_ref[i].type == "image/png":
                 pic_counter+=1
-                st.image(ss.all_files_ref[i], caption = ss.all_files_ref[i].name)
-                col11, col22 = st.columns(2)
+               
+                col11, col22 = st.columns([2,1])
                 with col11:
-                   st.selectbox("SB_Pictures_" + str(pic_counter), ["Top View", "Bottom View", "Layer Stack"], label_visibility="collapsed")
+                   pic_name = st.selectbox("SB_Pictures_" + str(pic_counter), ["Top_View", "Bottom_View", "Layer_Stack"], label_visibility="collapsed")
                 with col22:
-                    download_button_image(ss.all_files_ref[i], "Guardar Imagem " + str(pic_counter), ss.all_files_ref[i].name)
+                    download_button_image(ss.all_files_ref[i], "Guardar Imagem " + str(pic_counter), ss.nome_projecto_ref + "_" + str(pic_name) + ".png")
+                st.image(ss.all_files_ref[i], caption = ss.all_files_ref[i].name)
                 st.divider()
     else:
         st.caption("Sem ficheiros para mostrar")
@@ -96,14 +93,15 @@ with col2:
         for i in range(len(ss.all_files_ref)):
             if ss.all_files_ref[i].type == "application/pdf":
                 pdf_counter+=1
+                col11, col22 = st.columns([2,1])
+                with col11:
+                    pdf_name = st.selectbox("SB_PDF_" + str(pdf_counter), ["Top_Silkscreen", "Bottom_Silkscreen"], label_visibility="collapsed")  
+                with col22: 
+                    download_button_pdf(ss.all_files_ref[i], "Guardar PDF " + str(pdf_counter), ss.nome_projecto_ref + "_" + str(pdf_name) + ".pdf")
+                
                 binary_data = ss.all_files_ref[i].getvalue()
                 pdf_viewer(input=binary_data)
                 st.caption(ss.all_files_ref[i].name)  
-                col11, col22 = st.columns(2)
-                with col11:
-                    st.selectbox("SB_PDF_" + str(pdf_counter), ["Top Silkscreen", "Bottom Silkscreen"], label_visibility="collapsed")  
-                with col22: 
-                    download_button_pdf(ss.all_files_ref[i], "Guardar PDF " + str(pdf_counter), ss.all_files_ref[i].name)
                 st.divider()
     else:
         st.caption("Sem ficheiros para mostrar")
@@ -119,12 +117,20 @@ with col1:
         st.caption('4) Pressione "Save" para guardar a BOM.csv')
     
     if ss.all_files_ref:
+        csv_counter = 0
         for i in range(len(ss.all_files_ref)):
             if ss.all_files_ref[i].type == "text/csv":
+                csv_counter+=1
                 csv_to_df = pd.read_csv(ss.all_files_ref[i], sep = ";")
-                st.caption("Ficheiro XLSL formatado (nota que poderá ser necessário colorir a tabela através do microsoft Excel)")
-                st.dataframe(
-                    data = csv_to_df,
+                
+                type, data = df_checker(csv_to_df)
+
+                col11, col22 = st.columns([2,1])
+                with col22:
+                    download_button_pdf(ss.all_files_ref[i], "Guardar XSLX " + str(csv_counter), ss.nome_projecto_ref + "_" + type + ".xlsx")
+                
+                st.data_editor(
+                    data = data,
                     use_container_width=True,
                     column_config={
                         "HANDLING": st.column_config.SelectboxColumn(
@@ -137,9 +143,14 @@ with col1:
                             ],
                             required=True,
                         )}, hide_index=True)
-               
+                st.caption("Ficheiro XLSL formatado (nota que poderá ser necessário colorir a tabela através do microsoft Excel)")
+                
+              
+                st.divider()
+            
     else:
         st.caption("Sem ficheiros para mostrar")
+
 
 with col2:
     st.subheader("Ficheiro Read Me")
