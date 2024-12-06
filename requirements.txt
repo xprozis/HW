@@ -2,3 +2,4 @@ streamlit
 pandas
 openpyxl
 streamlit_pdf_viewer
+opencv-python
