@@ -126,7 +126,6 @@ with col1:
 
                 col11, col22 = st.columns([2,1])
                 with col22:
-
                     st.download_button(label="Guardar XLSX " + str(csv_counter), data=df_to_excel_data(data), file_name= ss.nome_projecto_ref + "_" + str(type) + ".xlsx",mime="application/vnd.ms-excel", use_container_width=True, type="primary")
 
                 st.data_editor(
