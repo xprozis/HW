@@ -69,4 +69,3 @@ def df_to_excel_data(df):
     writer.close()
     processed_data = output.getvalue()
     return processed_data
-
