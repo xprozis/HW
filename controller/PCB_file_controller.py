@@ -5,7 +5,6 @@ import io
 import cv2
 import numpy as np
 
-
 def custom_single_space():
     st.markdown("")
 
@@ -42,7 +41,7 @@ def df_checker(df):
     """
     if len(df.columns) == 1:
         
-        return "PicK_and_Place", pickplace_formatter(df)
+        return "Pick_and_Place", pickplace_formatter(df)
 
     else:
         return "BOM", bom_formatter(df)
@@ -70,4 +69,17 @@ def download_button_pdf(file,label_btn,file_name):
 
 def download_button_xsls(file,label_btn,file_name):
     st.download_button(label=label_btn,data=file, file_name=file_name,mime="text/xlsx", type="primary", use_container_width=True)
+
+
+def df_to_excel_data(df):
+    output = io.BytesIO()
+    writer = pd.ExcelWriter(output, engine='xlsxwriter')
+    df.to_excel(writer, index=False, sheet_name='Sheet1')
+    workbook = writer.book
+    worksheet = writer.sheets['Sheet1']
+    format1 = workbook.add_format({'num_format': '0.00'}) 
+    worksheet.set_column('A:A', None, format1)  
+    writer.close()
+    processed_data = output.getvalue()
+    return processed_data
 

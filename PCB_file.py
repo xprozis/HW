@@ -122,13 +122,13 @@ with col1:
             if ss.all_files_ref[i].type == "text/csv":
                 csv_counter+=1
                 csv_to_df = pd.read_csv(ss.all_files_ref[i], sep = ";")
-                
                 type, data = df_checker(csv_to_df)
 
                 col11, col22 = st.columns([2,1])
                 with col22:
-                    download_button_pdf(ss.all_files_ref[i], "Guardar XSLX " + str(csv_counter), ss.nome_projecto_ref + "_" + type + ".xlsx")
-                
+
+                    st.download_button(label="Guardar XLSX " + str(csv_counter), data=df_to_excel_data(data), file_name= ss.nome_projecto_ref + "_" + str(type) + ".xlsx",mime="application/vnd.ms-excel", use_container_width=True, type="primary")
+
                 st.data_editor(
                     data = data,
                     use_container_width=True,
@@ -143,9 +143,7 @@ with col1:
                             ],
                             required=True,
                         )}, hide_index=True)
-                st.caption("Ficheiro XLSL formatado (nota que poderá ser necessário colorir a tabela através do microsoft Excel)")
-                
-              
+                st.caption("Ficheiro XLSL formatado (nota que poderá ser necessário colorir a tabela através do microsoft Excel)")  
                 st.divider()
             
     else:
