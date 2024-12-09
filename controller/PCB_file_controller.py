@@ -2,14 +2,12 @@ import pandas as pd
 from PIL import Image
 import streamlit as st
 import io
-import cv2
-import numpy as np
 
 def custom_single_space():
     st.markdown("")
 
 def pickplace_formatter(df):
-    df = df[~df['RefDes,Layer,LocationX,LocationY,Rotation'].str.contains('FID')]
+    #df = df[~df['RefDes,Layer,LocationX,LocationY,Rotation'].str.contains('FID')]
     df = df[~df['RefDes,Layer,LocationX,LocationY,Rotation'].str.contains('FRAME')]
     return df
 
@@ -47,29 +45,6 @@ def df_checker(df):
         return "BOM", bom_formatter(df)
     
 
-def load_image(image_file):
-    img = Image.open(image_file)
-    return img
-
-def download_button_image(file,label_btn,file_name):
-    buffer = io.BytesIO()
-    file = file.read()
-    file_bytes = np.asarray(bytearray(file), dtype=np.uint8)
-    imageBGR = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-    imageRGB = cv2.cvtColor(imageBGR , cv2.COLOR_BGR2RGB)
-    im = Image.fromarray(imageRGB)
-    im.save(buffer, format="PNG")
-    st.download_button(label=label_btn,data=buffer, file_name=file_name,mime="image/png", type="primary", use_container_width=True)
-
-
-def download_button_pdf(file,label_btn,file_name):
-    file = file.read()
-    st.download_button(label=label_btn,data=file, file_name=file_name,mime="application/pdf", type="primary", use_container_width=True)
-
-
-def download_button_xsls(file,label_btn,file_name):
-    st.download_button(label=label_btn,data=file, file_name=file_name,mime="text/xlsx", type="primary", use_container_width=True)
-
 
 def df_to_excel_data(df):
     output = io.BytesIO()
@@ -77,7 +52,7 @@ def df_to_excel_data(df):
     df.to_excel(writer, index=False, sheet_name='Sheet1')
     workbook = writer.book
     worksheet = writer.sheets['Sheet1']
-    format1 = workbook.add_format({'num_format': '0.00'}) 
+    format1 = workbook.add_format({'num_format': '0'}) 
     worksheet.set_column('A:A', None, format1)  
     writer.close()
     processed_data = output.getvalue()

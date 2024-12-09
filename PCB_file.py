@@ -11,7 +11,7 @@ if 'pagina_ref' not in ss:
     ss.pagina_ref = 1
 
 if 'nome_projecto_ref' not in ss:
-    ss.nome_projecto_ref = "pcb000A_V0.0"
+    ss.nome_projecto_ref = "pcb000A_V0_0"
 
 if 'all_files_ref' not in ss:
     ss.all_files_ref = None
@@ -42,10 +42,9 @@ page_header("Ficheiros Produção PCB","Made by GOATs, for GOATs")
 
 col1, col2 = st.columns([1,2])
 with col1:
-    st.text_input("NomeProjecto", value = ss.nome_projecto_ref, key = "nome_projecto", placeholder='Nome projecto: "pcb0000_V0.0"', label_visibility="collapsed")
+    st.text_input('Inserir o Nome e Versão da PCB a produzir, separados por "_". Exemplo: "XBAND_pcb0021B_V0_7', value = ss.nome_projecto_ref, key = "nome_projecto", placeholder='Nome projecto: "pcb0000_V0.0"')
     if ss.nome_projecto:
         ss.nome_projecto_ref = ss.nome_projecto
-    st.caption('(Inserir o Nome e Versão da PCB a produzir, separados por "_". Exemplo: "pcb0021B_V0.75')
 
 st.file_uploader("Adicionar todos os ficheiros gerados", type=['png','pdf','csv'], key="all_files", accept_multiple_files=True, label_visibility="collapsed")
 if ss.all_files:
@@ -73,7 +72,8 @@ with col1:
                 with col11:
                    pic_name = st.selectbox("SB_Pictures_" + str(pic_counter), ["Top_View", "Bottom_View", "Layer_Stack"], label_visibility="collapsed")
                 with col22:
-                    download_button_image(ss.all_files_ref[i], "Guardar Imagem " + str(pic_counter), ss.nome_projecto_ref + "_" + str(pic_name) + ".png")
+                    st.download_button(label="Guardar Imagem " + str(pic_counter),data=ss.all_files_ref[i], file_name= ss.nome_projecto_ref + "_" + str(pic_name) + ".png" ,mime="image/png", type="primary", use_container_width=True)
+    
                 st.image(ss.all_files_ref[i], caption = ss.all_files_ref[i].name)
                 st.divider()
     else:
@@ -97,7 +97,9 @@ with col2:
                 with col11:
                     pdf_name = st.selectbox("SB_PDF_" + str(pdf_counter), ["Top_Silkscreen", "Bottom_Silkscreen"], label_visibility="collapsed")  
                 with col22: 
-                    download_button_pdf(ss.all_files_ref[i], "Guardar PDF " + str(pdf_counter), ss.nome_projecto_ref + "_" + str(pdf_name) + ".pdf")
+                    file = ss.all_files_ref[i].read()
+                    st.download_button(label= "Guardar PDF " + str(pdf_counter),data=file, file_name= ss.nome_projecto_ref + "_" + str(pdf_name) + ".pdf",mime="application/pdf", type="primary", use_container_width=True)
+             
                 
                 binary_data = ss.all_files_ref[i].getvalue()
                 pdf_viewer(input=binary_data)
@@ -105,55 +107,60 @@ with col2:
                 st.divider()
     else:
         st.caption("Sem ficheiros para mostrar")
- 
-col1, col2 = st.columns(2, gap="medium")
-with col1:
-    st.subheader("BOM e Pick_and_Place")
-    with st.expander("⚙️ Expandir para obter mais informações à cerca dos ficheiros necessários"):  
-        st.markdown("Instruções para gerar BOM")
-        st.caption('1) No Fusion, abrir a vista do Esquemático')
-        st.caption('2) No campo "OUTPUT" clicar no primeiro simbolo que representa "Bill of Materials"')
-        st.caption('3) Mudar o "List type" para "Values" e o "Output format" para CSV')
-        st.caption('4) Pressione "Save" para guardar a BOM.csv')
-    
-    if ss.all_files_ref:
-        csv_counter = 0
-        for i in range(len(ss.all_files_ref)):
-            if ss.all_files_ref[i].type == "text/csv":
-                csv_counter+=1
-                csv_to_df = pd.read_csv(ss.all_files_ref[i], sep = ";")
-                type, data = df_checker(csv_to_df)
 
-                col11, col22 = st.columns([2,1])
-                with col22:
+
+st.divider()
+st.subheader("BOM e Pick_and_Place")
+with st.expander("⚙️ Expandir para obter mais informações à cerca dos ficheiros necessários"):  
+    st.markdown("Instruções para gerar BOM")
+    st.caption('1) No Fusion, abrir a vista do Esquemático')
+    st.caption('2) No campo "OUTPUT" clicar no primeiro simbolo que representa "Bill of Materials"')
+    st.caption('3) Mudar o "List type" para "Values" e o "Output format" para CSV')
+    st.caption('4) Pressione "Save" para guardar a BOM.csv')
+
+if ss.all_files_ref:
+    csv_counter = 0
+    for i in range(len(ss.all_files_ref)):
+        if ss.all_files_ref[i].type == "text/csv":
+            csv_counter+=1
+            csv_to_df = pd.read_csv(ss.all_files_ref[i], sep = ";")
+            type, data = df_checker(csv_to_df)
+
+            col11, col22 = st.columns([2,1])
+            with col22:
+                if type == "BOM":
                     st.download_button(label="Guardar XLSX " + str(csv_counter), data=df_to_excel_data(data), file_name= ss.nome_projecto_ref + "_" + str(type) + ".xlsx",mime="application/vnd.ms-excel", use_container_width=True, type="primary")
+                if type == "Pick_and_Place":
+                    csv = data.to_csv(index=False).encode('utf-8')
+                    st.download_button("Guardar CSV " + str(csv_counter),csv, ss.nome_projecto_ref + "_" + str(type) + ".csv","text/csv",key='download-csv', use_container_width=True, type="primary")
+                    
+            st.data_editor(
+                data = data,
+                use_container_width=True,
+                column_config={
+                    "HANDLING": st.column_config.SelectboxColumn(
+                        "HANDLING",
+                        help="Select the handler",
+                        width="medium",
+                        options=[
+                            "Assembler",
+                            "Prozis"
+                        ],
+                        required=True,
+                    )}, hide_index=True)
+            st.caption("Ficheiro XLSL formatado (nota que poderá ser necessário colorir a tabela através do microsoft Excel)")  
+        
+else:
+    st.caption("Sem ficheiros para mostrar")
 
-                st.data_editor(
-                    data = data,
-                    use_container_width=True,
-                    column_config={
-                        "HANDLING": st.column_config.SelectboxColumn(
-                            "HANDLING",
-                            help="Select the handler",
-                            width="medium",
-                            options=[
-                                "Assembler",
-                                "Prozis"
-                            ],
-                            required=True,
-                        )}, hide_index=True)
-                st.caption("Ficheiro XLSL formatado (nota que poderá ser necessário colorir a tabela através do microsoft Excel)")  
-                st.divider()
-            
-    else:
-        st.caption("Sem ficheiros para mostrar")
 
 
-with col2:
-    st.subheader("Ficheiro Read Me")
-    if ss.all_files_ref:
-        st.text_area("")
-    else:
-        st.divider()
-        st.caption("Sem ficheiros para mostrar")
-      
+st.subheader("Ficheiro Read Me")
+if ss.all_files_ref:
+    template_type = st.selectbox("Selecionar template a usar", ["2 Layer", "4 Layer"])
+    with st.expander("Expandir para ver ficheiro Readme.txt"):
+        st.text("Teste")
+else:
+    st.divider()
+    st.caption("Sem ficheiros para mostrar")
+    
