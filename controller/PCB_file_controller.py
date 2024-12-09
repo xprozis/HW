@@ -3,10 +3,18 @@ from PIL import Image
 import streamlit as st
 import io
 
+
 def custom_single_space():
+    """
+        Funcao que gera um espaço entre items
+    """
     st.markdown("")
 
+
 def pickplace_formatter(df):
+    """
+        Filtro de CSV file
+    """
     #df = df[~df['RefDes,Layer,LocationX,LocationY,Rotation'].str.contains('FID')]
     df = df[~df['RefDes,Layer,LocationX,LocationY,Rotation'].str.contains('FRAME')]
     return df
@@ -33,6 +41,7 @@ def bom_formatter(df):
     df_formated = df_formated[~df_formated['Parts'].str.contains('FRAME1')]
     return df_formated
 
+
 def df_checker(df):
     """
         Verifica o numero de colunas, se for 1 é o Pick and Place se for mais é a BOM
@@ -47,6 +56,9 @@ def df_checker(df):
 
 
 def df_to_excel_data(df):
+    """
+        Converte dataframe para um ficheio excel
+    """
     output = io.BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
     df.to_excel(writer, index=False, sheet_name='Sheet1')

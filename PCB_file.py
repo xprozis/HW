@@ -19,12 +19,6 @@ if 'all_files_ref' not in ss:
 if 'image_ref' not in ss:
     ss.image_ref = None
 
-if 'image_3D_order_ref' not in ss:
-    ss.image_3D_order_ref = 0
-
-if 'pdf_order_ref' not in ss:
-    ss.pdf_order_ref = 0
-
 if 'pdf_ref' not in ss:
     ss.pdf_ref = None
 
@@ -72,7 +66,7 @@ with col1:
                 with col11:
                    pic_name = st.selectbox("SB_Pictures_" + str(pic_counter), ["Top_View", "Bottom_View", "Layer_Stack"], label_visibility="collapsed")
                 with col22:
-                    st.download_button(label="Guardar Imagem " + str(pic_counter),data=ss.all_files_ref[i], file_name= ss.nome_projecto_ref + "_" + str(pic_name) + ".png" ,mime="image/png", type="primary", use_container_width=True)
+                    st.download_button(label="Guardar Imagem" + str(pic_counter), data=ss.all_files_ref[i], file_name= ss.nome_projecto_ref + "_" + str(pic_name) + ".png" ,mime="image/png", type="primary", use_container_width=True)
     
                 st.image(ss.all_files_ref[i], caption = ss.all_files_ref[i].name)
                 st.divider()
@@ -99,8 +93,6 @@ with col2:
                 with col22: 
                     file = ss.all_files_ref[i].read()
                     st.download_button(label= "Guardar PDF " + str(pdf_counter),data=file, file_name= ss.nome_projecto_ref + "_" + str(pdf_name) + ".pdf",mime="application/pdf", type="primary", use_container_width=True)
-             
-                
                 binary_data = ss.all_files_ref[i].getvalue()
                 pdf_viewer(input=binary_data)
                 st.caption(ss.all_files_ref[i].name)  
@@ -154,13 +146,13 @@ else:
     st.caption("Sem ficheiros para mostrar")
 
 
-
+st.divider()
 st.subheader("Ficheiro Read Me")
 if ss.all_files_ref:
     template_type = st.selectbox("Selecionar template a usar", ["2 Layer", "4 Layer"])
     with st.expander("Expandir para ver ficheiro Readme.txt"):
         st.text("Teste")
 else:
-    st.divider()
+
     st.caption("Sem ficheiros para mostrar")
-    
+    st.divider()
