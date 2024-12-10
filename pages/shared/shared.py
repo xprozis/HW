@@ -16,6 +16,7 @@ def image_ccs():
         img {
             position: fixed;
             padding-top: 25rem;
+            padding-left: 5rem;
             opacity: 30%;
         }
 

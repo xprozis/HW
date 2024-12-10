@@ -17,15 +17,16 @@ if 'nome_pcb_ref' not in ss:
 if 'all_files_ref' not in ss:
     ss.all_files_ref = None
 
+im = Image.open("./pages/shared/p_logo.ico")
 
 st.set_page_config(
-    page_title="PROZIS HW File",
-    page_icon="🔴",
+    page_title="Ficheiros Produção PCB",
+    page_icon=im,
     layout="wide"
 )
 
 
-page_header("Ficheiros Produção PCB","Made by GOATs, for GOATs")
+page_header("Ficheiros Produção PCB", "Made by GOATs, for GOATs")
 
 
 col1, col2 = st.columns([1,2])
@@ -84,7 +85,7 @@ with col2:
                     pdf_name = st.selectbox("SB_PDF_" + str(pdf_counter), ["Silkscreen_Top", "Silkscreen_Bottom"], label_visibility="collapsed")  
                 with col22: 
                     file = ss.all_files_ref[i].read()
-                    st.download_button(label= "Guardar PDF " + str(pdf_counter),data=file, file_name= ss.nome_pcb_ref + "_" + str(pdf_name) + ".pdf",mime="application/pdf", type="primary", use_container_width=True)
+                    st.download_button(label= "Exportar PDF " + str(pdf_counter),data=file, file_name= ss.nome_pcb_ref + "_" + str(pdf_name) + ".pdf",mime="application/pdf", type="primary", use_container_width=True)
                 binary_data = ss.all_files_ref[i].getvalue()
                 pdf_viewer(input=binary_data)
                 st.caption(ss.all_files_ref[i].name)  
@@ -112,8 +113,6 @@ if ss.all_files_ref:
 
             if type == "BOM":
                 col11, col22 = st.columns([3,1])
-                st.caption("Dados da BOM com coluna selecionadas e ordenadas")
-                st.caption("Ficheiro XLSL formatado (nota que poderá ser necessário colorir a tabela através do microsoft Excel)")  
                 data_edited = st.data_editor(
                     data = data,
                     use_container_width=True,
@@ -128,14 +127,14 @@ if ss.all_files_ref:
                             ],
                             required=True,
                         )}, hide_index=True)
-                
+                st.caption("Dados da BOM com coluna selecionadas e ordenadas. Ficheiro XLSL formatado (nota que poderá ser necessário colorir a tabela através do microsoft Excel)")  
                 with col22:
-                    st.download_button(label="Guardar XLSX " + str(csv_counter), data=df_to_excel_data(data_edited), file_name= ss.nome_pcb_ref + "_" + str(type) + ".xlsx",mime="application/vnd.ms-excel", use_container_width=True, type="primary")
+                    st.download_button(label="Exportar XLSX " + str(csv_counter), data=df_to_excel_data(data_edited), file_name= ss.nome_pcb_ref + "_" + str(type) + ".xlsx",mime="application/vnd.ms-excel", use_container_width=True, type="primary")
                  
             
             if type == "Pick_and_Place":
                 col11, col22 = st.columns([3,1])
-                st.caption("Dados do Pick and place com a informação relativa ao frame removida")
+                st.caption("Dados do Pick and Place com a informação relativa ao frame removida")
                 data_edited = st.data_editor(
                 data = data,
                 use_container_width=True,
@@ -154,8 +153,8 @@ if ss.all_files_ref:
                 with col22:
                     csv = data.to_csv(index=False).encode('utf-8')
                     st.download_button("Guardar CSV " + str(csv_counter),csv, ss.nome_pcb_ref + "_" + str(type) + ".csv","text/csv",key='download-csv', use_container_width=True, type="primary")
-                   
-            custom_single_space()
+            
+            st.divider()
         
 else:
     custom_single_space()
@@ -205,4 +204,4 @@ Additional information:
 st.text_area("Ficheiro txt gerado", height=900, value = my_readme_2_layer, label_visibility="collapsed")
 
 with col2:
-    st.download_button("Guardar Readme.txt", file_name="Readme.txt", data=my_readme_2_layer, use_container_width=True, type="primary")
+    st.download_button("Exportar Readme", file_name="Readme.txt", data=my_readme_2_layer, use_container_width=True, type="primary")

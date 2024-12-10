@@ -24,6 +24,8 @@ def bom_formatter(df):
     """
         Formatador de dataframe
     """
+
+    # Constroi a tabela
     df_formated = pd.DataFrame()
     df_formated["Qty"] = df["Qty"]
     df_formated["REF"] = df["REF"]
@@ -37,8 +39,13 @@ def bom_formatter(df):
     df_formated["3_MANUFACTURER"] = df["3_MANUFACTURER"]
     df_formated["HANDLING"] = "Assembler"
 
+    # Remove fiduciais e frames
     df_formated = df_formated[~df_formated['Parts'].str.contains('FID1')]
     df_formated = df_formated[~df_formated['Parts'].str.contains('FRAME1')]
+
+    # Ordena a coluna Parts
+    df_formated = df_formated.sort_values("Parts", ascending=True)
+
     return df_formated
 
 
@@ -65,7 +72,8 @@ def df_to_excel_data(df):
     workbook = writer.book
     worksheet = writer.sheets['Sheet1']
     format1 = workbook.add_format({'num_format': '0'}) 
-    worksheet.set_column('A:A', None, format1)  
+    worksheet.set_column('A:A', None, format1)    
+     
     writer.close()
     processed_data = output.getvalue()
     return processed_data
