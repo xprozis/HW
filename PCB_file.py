@@ -3,6 +3,7 @@ from pages.shared.shared import *
 from controller.PCB_file_controller import *
 from streamlit_pdf_viewer import pdf_viewer
 from streamlit import session_state as ss
+import mitosheet.streamlit.v1 as mt
 
 sem_dados_texto = "Carregar ficheiros para mostrar"
 numero_paginas = 6
@@ -112,7 +113,10 @@ if ss.all_files_ref:
             
 
             if type == "BOM":
+                
                 col11, col22 = st.columns([3,1])
+
+       
                 data_edited = st.data_editor(
                     data = data,
                     use_container_width=True,
@@ -134,7 +138,8 @@ if ss.all_files_ref:
             
             if type == "Pick_and_Place":
                 col11, col22 = st.columns([3,1])
-                st.caption("Dados do Pick and Place com a informação relativa ao frame removida")
+              
+        
                 data_edited = st.data_editor(
                 data = data,
                 use_container_width=True,
@@ -149,7 +154,8 @@ if ss.all_files_ref:
                         ],
                         required=True,
                     )}, hide_index=True)
-                       
+            
+                st.caption("Dados do Pick and Place com a informação relativa ao frame removida")
                 with col22:
                     csv = data.to_csv(index=False).encode('utf-8')
                     st.download_button("Guardar CSV " + str(csv_counter),csv, ss.nome_pcb_ref + "_" + str(type) + ".csv","text/csv",key='download-csv', use_container_width=True, type="primary")
