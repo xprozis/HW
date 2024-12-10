@@ -32,7 +32,7 @@ page_header("Ficheiros Produção PCB", "Made by GOATs, for GOATs")
 
 col1, col2 = st.columns([1,2])
 with col1:
-    st.text_input('Inserir o Nome e Versão da PCB a produzir, separados por "_". Exemplo: "pcb0021B_V0_7', value = ss.nome_pcb_ref, key = "nome_projecto_pcb", placeholder='Nome projecto: "pcb0000_V0.0"')
+    st.text_input('Inserir o Nome e Versão da PCB a produzir. Exemplo: "pcb0021B_V0_7', value = ss.nome_pcb_ref, key = "nome_projecto_pcb", placeholder='Nome projecto: "pcb0000_V0.0"')
     if ss.nome_projecto_pcb:
         ss.nome_pcb_ref = ss.nome_projecto_pcb
 
