@@ -3,7 +3,6 @@ from pages.shared.shared import *
 from controller.PCB_file_controller import *
 from streamlit_pdf_viewer import pdf_viewer
 from streamlit import session_state as ss
-import mitosheet.streamlit.v1 as mt
 
 sem_dados_texto = "Carregar ficheiros para mostrar"
 numero_paginas = 6
@@ -14,9 +13,12 @@ if 'pagina_ref' not in ss:
 if 'nome_pcb_ref' not in ss:
     ss.nome_pcb_ref = "pcb000A_V0_0"
 
-
 if 'all_files_ref' not in ss:
     ss.all_files_ref = None
+
+if 'saved_files_ref' not in ss:
+    ss.saved_files_ref = [""]
+
 
 im = Image.open("./pages/shared/p_logo.ico")
 
@@ -26,6 +28,10 @@ st.set_page_config(
     layout="wide"
 )
 
+def add_name(name):
+    ss.saved_files_ref.append(name)
+    ss.saved_files_ref = list(set(ss.saved_files_ref))
+                 
 
 page_header("Ficheiros Produção PCB", "Made by GOATs, for GOATs")
 
@@ -61,7 +67,11 @@ with col1:
                 with col11:
                     pic_name = st.selectbox("SB_Pictures_" + str(pic_counter), ["View_Top", "View_Bottom", "Layer_Stack"], label_visibility="collapsed")
                 with col22:
-                    st.download_button(label="Guardar Imagem " + str(pic_counter), data=ss.all_files_ref[i], file_name= ss.nome_pcb_ref + "_" + str(pic_name) + ".png" ,mime="image/png", type="primary", use_container_width=True)                 
+                    if st.download_button(label="Guardar Imagem " + str(pic_counter), data=ss.all_files_ref[i], file_name= ss.nome_pcb_ref + "_" + str(pic_name) + ".png" ,mime="image/png", type="primary", use_container_width=True):                 
+                        add_name(ss.all_files_ref[i].name)
+                    if ss.all_files_ref[i].name in ss.saved_files_ref:
+                        st.caption("⚠️ O ficheiro já foi exportado")
+
                 st.image(ss.all_files_ref[i], caption = ss.all_files_ref[i].name)
                 custom_single_space()
     else:
@@ -86,7 +96,11 @@ with col2:
                     pdf_name = st.selectbox("SB_PDF_" + str(pdf_counter), ["Silkscreen_Top", "Silkscreen_Bottom"], label_visibility="collapsed")  
                 with col22: 
                     file = ss.all_files_ref[i].read()
-                    st.download_button(label= "Exportar PDF " + str(pdf_counter),data=file, file_name= ss.nome_pcb_ref + "_" + str(pdf_name) + ".pdf",mime="application/pdf", type="primary", use_container_width=True)
+                    if st.download_button(label= "Exportar PDF " + str(pdf_counter),data=file, file_name= ss.nome_pcb_ref + "_" + str(pdf_name) + ".pdf",mime="application/pdf", type="primary", use_container_width=True):
+                        add_name(ss.all_files_ref[i].name)
+                    if ss.all_files_ref[i].name in ss.saved_files_ref:
+                        st.caption("⚠️ O ficheiro já foi exportado")
+
                 binary_data = ss.all_files_ref[i].getvalue()
                 pdf_viewer(input=binary_data)
                 st.caption(ss.all_files_ref[i].name)  
@@ -110,13 +124,9 @@ if ss.all_files_ref:
             csv_counter+=1
             csv_to_df = pd.read_csv(ss.all_files_ref[i], sep = ";")
             type, data = df_checker(csv_to_df)
-            
-
+        
             if type == "BOM":
-                
                 col11, col22 = st.columns([3,1])
-
-       
                 data_edited = st.data_editor(
                     data = data,
                     use_container_width=True,
@@ -133,13 +143,13 @@ if ss.all_files_ref:
                         )}, hide_index=True)
                 st.caption("Dados da BOM com coluna selecionadas e ordenadas. Ficheiro XLSL formatado (nota que poderá ser necessário colorir a tabela através do microsoft Excel)")  
                 with col22:
-                    st.download_button(label="Exportar XLSX " + str(csv_counter), data=df_to_excel_data(data_edited), file_name= ss.nome_pcb_ref + "_" + str(type) + ".xlsx",mime="application/vnd.ms-excel", use_container_width=True, type="primary")
-                 
+                    if st.download_button(label="Exportar XLSX " + str(csv_counter), data=df_to_excel_data(data_edited), file_name= ss.nome_pcb_ref + "_" + str(type) + ".xlsx",mime="application/vnd.ms-excel", use_container_width=True, type="primary"):
+                        add_name(ss.all_files_ref[i].name)
+                    if ss.all_files_ref[i].name in ss.saved_files_ref:
+                        st.caption("⚠️ O ficheiro já foi exportado")
             
             if type == "Pick_and_Place":
                 col11, col22 = st.columns([3,1])
-              
-        
                 data_edited = st.data_editor(
                 data = data,
                 use_container_width=True,
@@ -159,7 +169,6 @@ if ss.all_files_ref:
                 with col22:
                     csv = data.to_csv(index=False).encode('utf-8')
                     st.download_button("Guardar CSV " + str(csv_counter),csv, ss.nome_pcb_ref + "_" + str(type) + ".csv","text/csv",key='download-csv', use_container_width=True, type="primary")
-            
             st.divider()
         
 else:
