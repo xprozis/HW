@@ -37,15 +37,18 @@ def bom_formatter(df):
     df_formated["2_MANUFACTURER"] = df["2_MANUFACTURER"]
     df_formated["3_MPN"] = df["3_MPN"]
     df_formated["3_MANUFACTURER"] = df["3_MANUFACTURER"]
-    df_formated["HANDLING"] = "Assembler"
+    
+    # Configura o HANDLING entre Assembler ou Prozis
+    df_formated["HANDLING"] = "Prozis"
+    df_formated['HANDLING'][df_formated['Parts'].str.contains('R1')] = "Assembler"
+    df_formated['HANDLING'][df_formated['Parts'].str.contains('C1')] = "Assembler"
 
     # Remove fiduciais e frames
     df_formated = df_formated[~df_formated['Parts'].str.contains('FID1')]
     df_formated = df_formated[~df_formated['Parts'].str.contains('FRAME1')]
 
-    # Ordena a coluna Parts
-    df_formated = df_formated.sort_values("Parts", ascending=True)
-
+    # Ordena a coluna HANDLING
+    df_formated = df_formated.sort_values("HANDLING", ascending=True)
     return df_formated
 
 
@@ -69,6 +72,8 @@ def df_to_excel_data(df):
     output = io.BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
     df.to_excel(writer, index=False, sheet_name='Sheet1')
+
+    # Workbook
     workbook = writer.book
     worksheet = writer.sheets['Sheet1']
     format1 = workbook.add_format({'num_format': '0'}) 

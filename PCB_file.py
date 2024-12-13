@@ -6,6 +6,7 @@ from streamlit import session_state as ss
 
 sem_dados_texto = "Carregar ficheiros para mostrar"
 numero_paginas = 6
+width = 800
 
 if 'pagina_ref' not in ss:
     ss.pagina_ref = 1
@@ -34,81 +35,18 @@ def add_name(name):
                  
 
 page_header("Ficheiros Produção PCB", "Made by GOATs, for GOATs")
-
-
-col1, col2 = st.columns([1,2])
+col1, col2 = st.columns([1,1])
 with col1:
     st.text_input('Inserir o Nome e Versão da PCB a produzir. Exemplo: "pcb0021B_V0_7', value = ss.nome_pcb_ref, key = "nome_projecto_pcb", placeholder='Nome projecto: "pcb0000_V0.0"')
     if ss.nome_projecto_pcb:
         ss.nome_pcb_ref = ss.nome_projecto_pcb
-
     st.file_uploader("Adicionar todos os ficheiros gerados", type=['png','pdf','csv'], key="all_files", accept_multiple_files=True, label_visibility="collapsed")
     if ss.all_files:
         ss.all_files_ref = ss.all_files
-    
-custom_single_space()
-
-col1, col2 = st.columns(2, gap="medium")
-with col1:
-    st.subheader("Top_View, Bottom_View e Layer_stack")
-    with st.popover("⚙️ Expandir para obter mais informações à cerca dos ficheiros necessários"):
-        st.markdown("Adicionar capturas de ecra da vista TOP e BOTTOM da PCB")
-        st.caption("1) No Fusion, abrir a vista 3D da PCB.")
-        st.caption("2) Começar por tirar uma captura de ecra à vista superior - TOP VIEW")
-        st.caption("3) Tirar uma captura de ecra à vista inferior - BOTTOM VIEW")
-        st.caption("4) Seleciomar as duas capturas de ecra e colar a baixo")
-    
-    if ss.all_files_ref:
-        pic_counter = 0
-        for i in range(len(ss.all_files_ref)):
-            if ss.all_files_ref[i].type == "image/png":
-                pic_counter+=1
-                col11, col22 = st.columns([2,1])
-                with col11:
-                    pic_name = st.selectbox("SB_Pictures_" + str(pic_counter), ["View_Top", "View_Bottom", "Layer_Stack"], label_visibility="collapsed")
-                with col22:
-                    if st.download_button(label="Guardar Imagem " + str(pic_counter), data=ss.all_files_ref[i], file_name= ss.nome_pcb_ref + "_" + str(pic_name) + ".png" ,mime="image/png", type="primary", use_container_width=True):                 
-                        add_name(ss.all_files_ref[i].name)
-                    if ss.all_files_ref[i].name in ss.saved_files_ref:
-                        st.caption("⚠️ O ficheiro já foi exportado")
-
-                st.image(ss.all_files_ref[i], caption = ss.all_files_ref[i].name)
-                custom_single_space()
-    else:
-        custom_single_space()
-
-with col2:
-    st.subheader("Top_View_Silkscreen, Bottom_View_Silkcseen")
-    with st.popover("⚙️ Expandir para obter mais informações à cerca dos ficheiros necessários"):  
-        st.markdown("Instruções para gerar Silkscreen Top e Bottom")
-        st.caption('1) No Fusion, abrir a vista "Layout"')
-        st.caption('2) No separador "Display Layers" selecionar')
-        st.caption('3) Clique em imprimir')
-        st.caption('4) Nas configurações selecionar')
-    
-    if ss.all_files_ref:
-        pdf_counter = 0
-        for i in range(len(ss.all_files_ref)):
-            if ss.all_files_ref[i].type == "application/pdf":
-                pdf_counter+=1
-                col11, col22 = st.columns([2,1])
-                with col11:
-                    pdf_name = st.selectbox("SB_PDF_" + str(pdf_counter), ["Silkscreen_Top", "Silkscreen_Bottom"], label_visibility="collapsed")  
-                with col22: 
-                    file = ss.all_files_ref[i].read()
-                    if st.download_button(label= "Exportar PDF " + str(pdf_counter),data=file, file_name= ss.nome_pcb_ref + "_" + str(pdf_name) + ".pdf",mime="application/pdf", type="primary", use_container_width=True):
-                        add_name(ss.all_files_ref[i].name)
-                    if ss.all_files_ref[i].name in ss.saved_files_ref:
-                        st.caption("⚠️ O ficheiro já foi exportado")
-
-                binary_data = ss.all_files_ref[i].getvalue()
-                pdf_viewer(input=binary_data)
-                st.caption(ss.all_files_ref[i].name)  
-                custom_single_space()
-    else:
-        custom_single_space()
 
 st.divider()
+
+custom_single_space()
 st.subheader("BOM e Pick_and_Place")
 with st.popover("⚙️ Expandir para obter mais informações à cerca dos ficheiros necessários"):  
     st.markdown("Instruções para gerar BOM")
@@ -169,15 +107,72 @@ if ss.all_files_ref:
                 with col22:
                     csv = data.to_csv(index=False).encode('utf-8')
                     st.download_button("Guardar CSV " + str(csv_counter),csv, ss.nome_pcb_ref + "_" + str(type) + ".csv","text/csv",key='download-csv', use_container_width=True, type="primary")
-            st.divider()
-        
+            single_space()
 else:
     custom_single_space()
 
+custom_single_space()
+st.subheader("Top_View, Bottom_View e Layer_stack")
+with st.popover("⚙️ Expandir para obter mais informações à cerca dos ficheiros necessários"):
+    st.markdown("Adicionar capturas de ecra da vista TOP e BOTTOM da PCB")
+    st.caption("1) No Fusion, abrir a vista 3D da PCB.")
+    st.caption("2) Começar por tirar uma captura de ecra à vista superior - TOP VIEW")
+    st.caption("3) Tirar uma captura de ecra à vista inferior - BOTTOM VIEW")
+    st.caption("4) Seleciomar as duas capturas de ecra e colar a baixo")
 
-st.divider()
+if ss.all_files_ref:
+    pic_counter = 0
+    for i in range(len(ss.all_files_ref)):
+        if ss.all_files_ref[i].type == "image/png":
+            pic_counter+=1
+            col11, col22 = st.columns([3,1])
+            with col11:
+                pic_name = st.selectbox("SB_Pictures_" + str(pic_counter), ["View_Top", "View_Bottom", "Layer_Stack"], label_visibility="collapsed")
+            with col22:
+                if st.download_button(label="Guardar Imagem " + str(pic_counter), data=ss.all_files_ref[i], file_name= ss.nome_pcb_ref + "_" + str(pic_name) + ".png" ,mime="image/png", type="primary", use_container_width=True):                 
+                    add_name(ss.all_files_ref[i].name)
+                if ss.all_files_ref[i].name in ss.saved_files_ref:
+                    st.caption("⚠️ O ficheiro já foi exportado")
+
+            st.image(ss.all_files_ref[i], caption = ss.all_files_ref[i].name, width = width)
+            custom_single_space()
+else:
+    custom_single_space()
+
+custom_single_space()
+
+st.subheader("Top_View_Silkscreen, Bottom_View_Silkcseen")
+with st.popover("⚙️ Expandir para obter mais informações à cerca dos ficheiros necessários"):  
+    st.markdown("Instruções para gerar Silkscreen Top e Bottom")
+    st.caption('1) No Fusion, abrir a vista "Layout"')
+    st.caption('2) No separador "Display Layers" selecionar')
+    st.caption('3) Clique em imprimir')
+    st.caption('4) Nas configurações selecionar')
+
+if ss.all_files_ref:
+    pdf_counter = 0
+    for i in range(len(ss.all_files_ref)):
+        if ss.all_files_ref[i].type == "application/pdf":
+            pdf_counter+=1
+            col11, col22 = st.columns([3,1])
+            with col11:
+                pdf_name = st.selectbox("SB_PDF_" + str(pdf_counter), ["Silkscreen_Top", "Silkscreen_Bottom"], label_visibility="collapsed")  
+            with col22: 
+                file = ss.all_files_ref[i].read()
+                if st.download_button(label= "Exportar PDF " + str(pdf_counter),data=file, file_name= ss.nome_pcb_ref + "_" + str(pdf_name) + ".pdf",mime="application/pdf", type="primary", use_container_width=True):
+                    add_name(ss.all_files_ref[i].name)
+                if ss.all_files_ref[i].name in ss.saved_files_ref:
+                    st.caption("⚠️ O ficheiro já foi exportado")
+
+            binary_data = ss.all_files_ref[i].getvalue()
+            pdf_viewer(input=binary_data, width=width)
+            st.caption(ss.all_files_ref[i].name)  
+            custom_single_space()
+else:
+    custom_single_space()
+
+custom_single_space()
 st.subheader("Ficheiro Read Me")
-
 col1, col2 = st.columns([3,1])
 my_readme_2_layer = f"""_ Production Files
 Includes:
