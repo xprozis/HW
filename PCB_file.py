@@ -4,6 +4,7 @@ from controller.PCB_file_controller import *
 from streamlit_pdf_viewer import pdf_viewer
 from streamlit import session_state as ss
 
+sucesso_text = "✅ O ficheiro já foi exportado"
 sem_dados_texto = "Carregar ficheiros para mostrar"
 numero_paginas = 6
 width = 800
@@ -44,8 +45,8 @@ with col1:
     if ss.all_files:
         ss.all_files_ref = ss.all_files
 
-st.divider()
 
+st.divider()
 custom_single_space()
 st.subheader("BOM e Pick_and_Place")
 with st.popover("⚙️ Expandir para obter mais informações à cerca dos ficheiros necessários"):  
@@ -54,7 +55,6 @@ with st.popover("⚙️ Expandir para obter mais informações à cerca dos fich
     st.caption('2) No campo "OUTPUT" clicar no primeiro simbolo que representa "Bill of Materials"')
     st.caption('3) Mudar o "List type" para "Values" e o "Output format" para CSV')
     st.caption('4) Pressione "Save" para guardar a BOM.csv')
-
 if ss.all_files_ref:
     csv_counter = 0
     for i in range(len(ss.all_files_ref)):
@@ -84,7 +84,7 @@ if ss.all_files_ref:
                     if st.download_button(label="Exportar XLSX " + str(csv_counter), data=df_to_excel_data(data_edited), file_name= ss.nome_pcb_ref + "_" + str(type) + ".xlsx",mime="application/vnd.ms-excel", use_container_width=True, type="primary"):
                         add_name(ss.all_files_ref[i].name)
                     if ss.all_files_ref[i].name in ss.saved_files_ref:
-                        st.caption("⚠️ O ficheiro já foi exportado")
+                        st.caption(sucesso_text)
             
             if type == "Pick_and_Place":
                 col11, col22 = st.columns([3,1])
@@ -106,7 +106,12 @@ if ss.all_files_ref:
                 st.caption("Dados do Pick and Place com a informação relativa ao frame removida")
                 with col22:
                     csv = data.to_csv(index=False).encode('utf-8')
-                    st.download_button("Guardar CSV " + str(csv_counter),csv, ss.nome_pcb_ref + "_" + str(type) + ".csv","text/csv",key='download-csv', use_container_width=True, type="primary")
+                    if st.download_button("Guardar CSV " + str(csv_counter),csv, ss.nome_pcb_ref + "_" + str(type) + ".csv","text/csv",key='download-csv', use_container_width=True, type="primary"):
+                        add_name(ss.all_files_ref[i].name)
+                    if ss.all_files_ref[i].name in ss.saved_files_ref:
+                        st.caption(sucesso_text)
+            
+            
             single_space()
 else:
     custom_single_space()
@@ -132,7 +137,7 @@ if ss.all_files_ref:
                 if st.download_button(label="Guardar Imagem " + str(pic_counter), data=ss.all_files_ref[i], file_name= ss.nome_pcb_ref + "_" + str(pic_name) + ".png" ,mime="image/png", type="primary", use_container_width=True):                 
                     add_name(ss.all_files_ref[i].name)
                 if ss.all_files_ref[i].name in ss.saved_files_ref:
-                    st.caption("⚠️ O ficheiro já foi exportado")
+                    st.caption(sucesso_text)
 
             st.image(ss.all_files_ref[i], caption = ss.all_files_ref[i].name, width = width)
             custom_single_space()
@@ -162,7 +167,7 @@ if ss.all_files_ref:
                 if st.download_button(label= "Exportar PDF " + str(pdf_counter),data=file, file_name= ss.nome_pcb_ref + "_" + str(pdf_name) + ".pdf",mime="application/pdf", type="primary", use_container_width=True):
                     add_name(ss.all_files_ref[i].name)
                 if ss.all_files_ref[i].name in ss.saved_files_ref:
-                    st.caption("⚠️ O ficheiro já foi exportado")
+                    st.caption(sucesso_text)
 
             binary_data = ss.all_files_ref[i].getvalue()
             pdf_viewer(input=binary_data, width=width)

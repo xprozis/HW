@@ -64,7 +64,6 @@ def df_checker(df):
         return "BOM", bom_formatter(df)
     
 
-
 def df_to_excel_data(df):
     """
         Converte dataframe para um ficheio excel
@@ -76,9 +75,12 @@ def df_to_excel_data(df):
     # Workbook
     workbook = writer.book
     worksheet = writer.sheets['Sheet1']
+
     format1 = workbook.add_format({'num_format': '0'}) 
-    worksheet.set_column('A:A', None, format1)    
-     
+    worksheet.set_column('A:A', None, format1)
+    worksheet.autofit()
+    
     writer.close()
     processed_data = output.getvalue()
     return processed_data
+
